@@ -1,0 +1,38 @@
+version: "3.7"
+services:
+  cadvisor:
+    image: google/cadvisor:latest
+    pull_policy: {{ cadvisor_pull_policy }}
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+{% if prom_samehost == true %}
+      - prometheus-network
+{% else %}
+      - default
+{% endif %}
+{% if loki_host == "" %}
+    logging:
+      options:
+        max-size: "10k"
+        max-file: "5"
+{% else %}
+    logging:
+      driver: loki
+      options:
+        loki-url: https://{{ loki_host }}/loki/api/v1/push
+        loki-tenant-id: {{ loki_tenant_id }}
+        max-size: "10k"
+        max-file: "5"
+{% endif %}
+
+{% if prom_samehost == true %}
+networks:
+  prometheus-network:
+    external: true
+{% endif %}

@@ -1,0 +1,5 @@
+---
+# defaults file for ansible-role-docker-cadvisor
+prom_network_subnet: 192.168.100.0/24
+prom_samehost: true
+cadvisor_pull_policy: always

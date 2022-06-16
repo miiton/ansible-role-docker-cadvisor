@@ -1,0 +1,7 @@
+---
+- name: Restart cadvisor
+  systemd:
+    name: docker-compose-service@cadvisor
+    enabled: yes
+    state: restarted
+    daemon_reload: yes

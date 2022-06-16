@@ -1,0 +1,31 @@
+---
+- name: Create directories
+  file:
+    state: directory
+    path: "{{ item }}"
+    mode: 0755
+  with_items:
+    - /opt/docker-compose-service/cadvisor
+
+- name: Create a prometheus network
+  docker_network:
+    name: prometheus-network
+    ipam_config:
+      - subnet: {{ prom_network_subnet }}
+    driver_options:
+      com.docker.network.bridge.name: prom0
+  when: prom_samehost == true
+  notify: Restart cadvisor
+
+- name: Put docker-compose.yml
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/docker-compose-service/cadvisor/docker-compose.yml
+  notify: Restart cadvisor
+
+- name: Start cadvisor
+  systemd:
+    name: docker-compose-service@cadvisor
+    enabled: yes
+    state: started
+    daemon_reload: yes
